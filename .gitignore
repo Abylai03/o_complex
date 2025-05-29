@@ -1,0 +1,25 @@
+# Временные файлы
+weather.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# Тестовые артефакты
+.pytest_cache/
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# MacOS
+.DS_Store

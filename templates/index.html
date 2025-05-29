@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Weather App</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      #cityInput {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #suggestions {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+      }
+      #suggestions div {
+        padding: 10px;
+        cursor: pointer;
+      }
+      #suggestions div:hover {
+        background-color: #f0f0f0;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      #weatherResult {
+        margin-top: 20px;
+      }
+      .forecast-card {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        margin: 5px 0;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      .forecast-time {
+        font-weight: bold;
+        color: #333;
+      }
+      .forecast-temp {
+        color: #007bff;
+      }
+      .forecast-desc {
+        color: #555;
+      }
+      .error {
+        color: red;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Weather Forecast</h1>
+      {% if last_city %}
+      <p>
+        Last searched:
+        <a href="#" onclick="getWeather('{{ last_city }}')">{{ last_city }}</a>
+      </p>
+      {% endif %}
+      <input type="text" id="cityInput" placeholder="Enter city name" />
+      <div id="suggestions"></div>
+      <button onclick="getWeather($('#cityInput').val())">Get Weather</button>
+      <div id="weatherResult"></div>
+    </div>
+
+    <script>
+      // $(document).ready(function () {
+      //   $("#cityInput").on("input", function () {
+      //     let query = $(this).val();
+      //     if (query.length > 2) {
+      //       $.get("/autocomplete", { query: query }, function (data) {
+      //         let suggestions = data.map(
+      //           (city) =>
+      //             `<div onclick="selectCity('${city.name}')">${city.name}</div>`
+      //         );
+      //         $("#suggestions").html(suggestions.join(""));
+      //       });
+      //     } else {
+      //       $("#suggestions").html("");
+      //     }
+      //   });
+      // });
+
+      $(document).ready(function () {
+        let timeout;
+        $("#cityInput").on("input", function () {
+          clearTimeout(timeout);
+          let query = $(this).val();
+          if (query.length > 2) {
+            timeout = setTimeout(() => {
+              $.get("/autocomplete", { query: query }, function (data) {
+                let suggestions = data.map(
+                  (city) =>
+                    `<div onclick="selectCity('${city.name}')">${city.name}</div>`
+                );
+                $("#suggestions").html(suggestions.join(""));
+              });
+            }, 300); // Задержка 300 мс
+          } else {
+            $("#suggestions").html("");
+          }
+        });
+      });
+
+      function selectCity(city) {
+        $("#cityInput").val(city);
+        $("#suggestions").html("");
+        getWeather(city);
+      }
+
+      function getWeather(city) {
+        const weatherCodeMap = {
+          0: "Clear sky",
+          1: "Mainly clear",
+          2: "Partly cloudy",
+          3: "Overcast",
+          45: "Fog",
+          51: "Light drizzle",
+          53: "Moderate drizzle",
+          55: "Dense drizzle",
+          61: "Light rain",
+          63: "Moderate rain",
+          65: "Heavy rain",
+          71: "Light snow",
+          73: "Moderate snow",
+          75: "Heavy snow",
+        };
+
+        $.post("/weather", { city: city }, function (data) {
+          let html = `<h2>Weather in ${data.city}</h2>`;
+          data.forecast.forEach((f) => {
+            const time = new Date(f.time).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const weatherDesc = weatherCodeMap[f.weather_code] || "Unknown";
+            html += `
+              <div class="forecast-card">
+                <span class="forecast-time">${time}</span>
+                <span class="forecast-temp">${f.temperature}°C</span>
+                <span class="forecast-desc">${weatherDesc}</span>
+              </div>
+            `;
+          });
+          $("#weatherResult").html(html);
+        }).fail(function (xhr) {
+          $("#weatherResult").html(
+            `<p class="error">${xhr.responseJSON.detail}</p>`
+          );
+        });
+      }
+    </script>
+  </body>
+</html>
