@@ -9,19 +9,3 @@ python-multipart==0.0.12
 responses==0.25.7
 setuptools==75.8.2
 uvicorn==0.32.0
-
-test_task/
-├─ static/
-│  └─ style.css
-├─ templates/
-│  └─ index.html
-├─ test/
-│  └─ requirements.txt
-├─ comp.py
-├─ dockerfile
-├─ main.py
-├─ output.txt
-├─ readme.md
-├─ requirements.txt
-├─ test.py
-└─ weather.db

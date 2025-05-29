@@ -9,7 +9,6 @@ import httpx
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-# Регистрация адаптера для datetime
 def adapt_datetime(dt):
     return dt.isoformat()
 
@@ -20,7 +19,6 @@ app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Database initialization
 def init_db():
     with sqlite3.connect("weather.db") as conn:
         conn.execute("""
@@ -43,23 +41,6 @@ init_db()
 class CitySuggestion(BaseModel):
     name: str
 
-# @app.get("/", response_class=HTMLResponse)
-# async def home(request: Request):
-#     user_id = request.session.get("user_id", str(datetime.now().timestamp()))
-#     request.session["user_id"] = user_id
-    
-#     with sqlite3.connect("weather.db") as conn:
-#         cursor = conn.execute(
-#             "SELECT city FROM search_history WHERE user_id = ? ORDER BY search_time DESC LIMIT 1",
-#             (user_id,)
-#         )
-#         last_city = cursor.fetchone()
-    
-#     return templates.TemplateResponse(
-#         "index.html",
-#         {"request": request, "last_city": last_city[0] if last_city else None}
-#     )
-
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     user_id = request.session.get("user_id", str(datetime.now().timestamp()))
@@ -73,7 +54,7 @@ async def home(request: Request):
         last_city = cursor.fetchone()
     
     return templates.TemplateResponse(
-        request=request,  # Первый аргумент - request
+        request=request, 
         name="index.html",
         context={"last_city": last_city[0] if last_city else None}
     )
@@ -125,21 +106,6 @@ async def get_weather(request: Request, city: str = Form(...)):
             })
         
         return {"city": city, "forecast": formatted_data[:24]}
-
-# @app.get("/autocomplete", response_model=List[CitySuggestion])
-# async def autocomplete(query: str):
-#     async with httpx.AsyncClient() as client:
-#         geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={query}&count=5&language=ru"
-#         geo_response = await client.get(geo_url)
-        
-#         if geo_response.status_code != 200 or not geo_response.json().get("results"):
-#             return []
-        
-#         cities = [
-#             {"name": f"{result['name']}, {result['country']}"}
-#             for result in geo_response.json()["results"]
-#         ]
-#         return cities
 
 @app.get("/autocomplete", response_model=List[CitySuggestion])
 async def autocomplete(query: str):

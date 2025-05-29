@@ -91,23 +91,6 @@
     </div>
 
     <script>
-      // $(document).ready(function () {
-      //   $("#cityInput").on("input", function () {
-      //     let query = $(this).val();
-      //     if (query.length > 2) {
-      //       $.get("/autocomplete", { query: query }, function (data) {
-      //         let suggestions = data.map(
-      //           (city) =>
-      //             `<div onclick="selectCity('${city.name}')">${city.name}</div>`
-      //         );
-      //         $("#suggestions").html(suggestions.join(""));
-      //       });
-      //     } else {
-      //       $("#suggestions").html("");
-      //     }
-      //   });
-      // });
-
       $(document).ready(function () {
         let timeout;
         $("#cityInput").on("input", function () {
@@ -122,7 +105,7 @@
                 );
                 $("#suggestions").html(suggestions.join(""));
               });
-            }, 300); // Задержка 300 мс
+            }, 300);
           } else {
             $("#suggestions").html("");
           }
